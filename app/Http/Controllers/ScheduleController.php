@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Group;
 use App\GroupSubjects;
 use App\Hour;
 use Illuminate\Http\Request;
@@ -10,7 +11,9 @@ class ScheduleController extends Controller
 {
     public function getGetSchedule() {
 
-        $schedules = GroupSubjects::where('teacher_id', 1)->with(['teacher', 'subject', 'group', 'days', 'days.hours', 'days.hours.hour'])->get();
+        $groups = Group::where('period_id', 1)->select('id')->get();
+
+        $schedules = GroupSubjects::where('teacher_id', 1)->whereIn('group_id', $groups)->with(['subject', 'group', 'days', 'days.hours'])->get();
 
         $array = $this->getListHours();
 
@@ -34,7 +37,7 @@ class ScheduleController extends Controller
             }
         }
 
-        return response()->json(["schedule" => $array]);
+        return response()->json(["schedule" => $array, "groups" => $groups]);
     }
 
     public function getListHours() {
